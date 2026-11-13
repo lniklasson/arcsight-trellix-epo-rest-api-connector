@@ -1,0 +1,67 @@
+{
+  "_info": "Config för epo_fetch_events.py. Nycklar som börjar med _ är kommentarer. Backslash skrivs dubbelt: DOMAN\\anvandare",
+
+  "_epo_url": "ePO-serverns adress inkl. port (normalt 8443)",
+  "epo_url": "https://epo.example.local:8443",
+
+  "_username": "ePO-konto med behörighet att köra queries mot Threat Events. Domänkonto: DOMAN\\anvandare",
+  "username": "svc_arcsight",
+
+  "_password_b64": "ePO-kontots lösenord base64-kodat. Skapa med: ./epo_fetch_events.py --encode-password  eller  echo -n 'MittLösenord' | base64 . Skydda filen med chmod 600 (base64 är inte kryptering)",
+  "password_b64": "",
+
+  "_password_env": "Miljövariabel som läses FÖRST om den är satt (har företräde framför password_b64 ovan). Klartext",
+  "password_env": "EPO_PASSWORD",
+
+  "_verify_tls": "true = verifiera ePO:s TLS-certifikat (rekommenderat), false = verifiera inte (bara för test)",
+  "verify_tls": true,
+
+  "_ca_cert": "Sökväg till CA-certifikatet (.pem) som signerat ePO:s cert. Tomt = systemets CA-lager. Används bara när verify_tls är true",
+  "ca_cert": "/opt/trellix/epo_ca.pem",
+
+  "_mode": "events = alla threat events (EPOEvents), extended = även hashar/sökvägar/regler men bara events med extended-data",
+  "mode": "events",
+
+  "_page_size": "Antal events per anrop/fil",
+  "page_size": 1000,
+
+  "_start_index": "Första AutoID som hämtas vid allra första körningen (när ingen state-fil finns)",
+  "start_index": 1,
+
+  "_extra_where": "Valfritt extra filter i ePO-syntax, t.ex. (eq EPOEvents.TenantId 1). Tomt = inget filter",
+  "extra_where": "",
+
+  "_strip_table_prefix": "true krävs av ArcSight-parsern (EPOEvents.ThreatName -> ThreatName)",
+  "strip_table_prefix": true,
+
+  "_output_dir": "Katalog för JSON-filerna som ArcSight Folder Follower läser",
+  "output_dir": "/opt/trellix/epo_events",
+
+  "_state_file": "Fil där senast hämtade AutoID sparas",
+  "state_file": "/opt/trellix/epo_state.json",
+
+  "_berikning": "Fält enligt ArcSights ePO-mappning som inte finns i EPOEvents",
+
+  "_server_host_name": "ePO-serverns namn -> Device Host Name. Tomt = värden i epo_url",
+  "server_host_name": "",
+
+  "_server_ip_address": "ePO-serverns IP -> Device Address. Tomt = slås upp via DNS",
+  "server_ip_address": "",
+
+  "_load_balance_http_port": "-> Source Port. Tomt = eventets egen SourcePort används",
+  "load_balance_http_port": "",
+
+  "_enrich_systems": "Hämta datoregenskaper per AgentGUID -> Old File ID/Name/Path/Permission/Type",
+  "enrich_systems": true,
+  "system_columns": ["SystemSerialNumber", "EmailAddress", "PlatformID", "SystemManufacturer", "SystemModel"],
+
+  "_enrich_event_names": "Hämta eventbeskrivning per ThreatEventID -> Name. 0409 = engelska",
+  "enrich_event_names": true,
+  "event_desc_language": "0409",
+
+  "timeout": 120,
+  "max_retries": 6,
+
+  "_max_pages": "Max antal sidor per körning, 0 = obegränsat",
+  "max_pages": 0
+}

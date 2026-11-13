@@ -1,0 +1,14 @@
+# Lokal config (innehåller lösenord) - bara exempelfilen versionshanteras
+epo_config.json
+config.json
+
+# Körtidsfiler
+epo_state.json
+*.lock
+epo_events/
+*.json.part
+debug.log
+
+# Python
+__pycache__/
+*.pyc
