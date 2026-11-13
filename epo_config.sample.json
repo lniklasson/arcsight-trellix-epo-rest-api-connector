@@ -1,0 +1,32 @@
+{
+  "epo_url": "https://epo01.example.local:8443",
+  "username": "EXAMPLE\\svc_arcsight",
+  "password_b64": "Q2hhbmdlTWUh",
+  "password_env": "EPO_PASSWORD",
+
+  "verify_tls": true,
+  "ca_cert": "/opt/trellix/epo_ca.pem",
+
+  "mode": "events",
+  "page_size": 1000,
+  "start_index": 1,
+  "extra_where": "",
+  "strip_table_prefix": true,
+
+  "output_dir": "/opt/trellix/epo_events",
+  "state_file": "/opt/trellix/epo_state.json",
+
+  "timeout": 120,
+  "max_retries": 6,
+  "max_pages": 0,
+  "lock_stale_seconds": 21600,
+
+  "server_host_name": "epo01.example.local",
+  "server_ip_address": "10.10.20.15",
+  "load_balance_http_port": "",
+
+  "enrich_systems": true,
+  "system_columns": ["SystemSerialNumber", "EmailAddress", "PlatformID", "SystemManufacturer", "SystemModel"],
+  "enrich_event_names": true,
+  "event_desc_language": "0409"
+}

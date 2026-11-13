@@ -8,6 +8,7 @@ local JSON files, plus an **ArcSight JSON Folder Follower parser** that maps the
 | `epo_fetch_events.py` | Incremental fetching of events from ePO into JSON files |
 | `trellix_epo.jsonparser.properties` | ArcSight FlexConnector parser (JSON Folder Follower) |
 | `epo_config.example.json` | Example config with an explanation of every setting |
+| `epo_config.sample.json` | Complete, filled-in config showing what a finished `epo_config.json` looks like |
 
 ## Features
 
@@ -24,7 +25,7 @@ local JSON files, plus an **ArcSight JSON Folder Follower parser** that maps the
 
 ```bash
 pip install requests            # Python 3.6: pip install "requests==2.27.1"
-cp epo_config.example.json epo_config.json
+cp epo_config.sample.json epo_config.json     # or epo_config.example.json (with explanations)
 chmod 600 epo_config.json
 
 ./epo_fetch_events.py --encode-password      # create the value for "password_b64"
@@ -40,6 +41,9 @@ Example cron entry (every 5 minutes):
 ```
 */5 * * * * cd /opt/trellix && ./epo_fetch_events.py >> /var/log/epo_fetch.log 2>&1
 ```
+
+All values in `epo_config.sample.json` are placeholders (host names, IP, account and the
+password `ChangeMe!` encoded as base64) and must be replaced with your own.
 
 ## Options
 
