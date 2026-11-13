@@ -1,8 +1,8 @@
-# Lokal config (innehåller lösenord) - bara exempelfilen versionshanteras
+# Local config (contains the password) - only the example file is versioned
 epo_config.json
 config.json
 
-# Körtidsfiler
+# Runtime files
 epo_state.json
 *.lock
 epo_events/

@@ -1,74 +1,74 @@
 # Trellix ePO → ArcSight
 
-Hämtar threat events från **Trellix ePolicy Orchestrator (on-prem)** via Web API till lokala
-JSON-filer, och en **ArcSight JSON Folder Follower-parser** som mappar fälten till CEF.
+Fetches threat events from **Trellix ePolicy Orchestrator (on-prem)** via the Web API into
+local JSON files, plus an **ArcSight JSON Folder Follower parser** that maps the fields to CEF.
 
-| Fil | Beskrivning |
+| File | Description |
 |---|---|
-| `epo_fetch_events.py` | Inkrementell hämtning av events från ePO till JSON-filer |
-| `trellix_epo.jsonparser.properties` | ArcSight FlexConnector-parser (JSON Folder Follower) |
-| `epo_config.example.json` | Exempel på config med förklaring av alla inställningar |
+| `epo_fetch_events.py` | Incremental fetching of events from ePO into JSON files |
+| `trellix_epo.jsonparser.properties` | ArcSight FlexConnector parser (JSON Folder Follower) |
+| `epo_config.example.json` | Example config with an explanation of every setting |
 
-## Funktioner
+## Features
 
-- `core.executeQuery` mot ePO med basic auth (`https://<epo>:8443/remote/`)
-- Inkrementell hämtning: fortsätter efter senast hämtade `EPOEvents.AutoID` (state-fil)
-- Paginering med `top N` + `AutoID > x`, retry/backoff vid 429/5xx/nätverksfel, lås-fil
-- Atomisk skrivning (`.json.part` → `.json`), så ArcSight aldrig läser halvskrivna filer
-- Normalisering: IPv4 (ePO-heltal → punktnotation), MAC (`00:11:22:AA:BB:CC`), ThreatHandled
-- Berikning enligt ArcSights ePO-mappning: ePO-server, datoregenskaper per AgentGUID,
-  eventbeskrivning per ThreatEventID (separata uppslag, ingen join)
-- Python 3.6+, enda beroendet är `requests`
+- `core.executeQuery` against ePO with basic auth (`https://<epo>:8443/remote/`)
+- Incremental fetching: continues after the last fetched `EPOEvents.AutoID` (state file)
+- Pagination with `top N` + `AutoID > x`, retry/backoff on 429/5xx/network errors, lock file
+- Atomic writes (`.json.part` → `.json`), so ArcSight never reads half-written files
+- Normalization: IPv4 (ePO integer → dotted notation), MAC (`00:11:22:AA:BB:CC`), ThreatHandled
+- Enrichment according to ArcSight's ePO mapping: the ePO server, system properties per
+  AgentGUID, event description per ThreatEventID (separate lookups, no join)
+- Python 3.6+, the only dependency is `requests`
 
-## Kom igång
+## Getting started
 
 ```bash
 pip install requests            # Python 3.6: pip install "requests==2.27.1"
 cp epo_config.example.json epo_config.json
 chmod 600 epo_config.json
 
-./epo_fetch_events.py --encode-password      # skapa värdet till "password_b64"
-# redigera epo_config.json: epo_url, username, password_b64, ca_cert, output_dir ...
+./epo_fetch_events.py --encode-password      # create the value for "password_b64"
+# edit epo_config.json: epo_url, username, password_b64, ca_cert, output_dir ...
 
-./epo_fetch_events.py --check-connection     # testa nätverk, TLS, inloggning, behörighet
-./epo_fetch_events.py --start-index 1        # första körningen
-./epo_fetch_events.py                        # därefter, t.ex. från cron
+./epo_fetch_events.py --check-connection     # test network, TLS, login, permissions
+./epo_fetch_events.py --start-index 1        # first run
+./epo_fetch_events.py                        # afterwards, e.g. from cron
 ```
 
-Exempel på cron (var 5:e minut):
+Example cron entry (every 5 minutes):
 
 ```
 */5 * * * * cd /opt/trellix && ./epo_fetch_events.py >> /var/log/epo_fetch.log 2>&1
 ```
 
-## Kommandon
+## Options
 
-| Flagga | Beskrivning |
+| Option | Description |
 |---|---|
-| `--config FIL` | Config-fil. Utan flaggan letas `epo_config.json`, `epo_config.example.json`, `config.example.json` |
-| `--start-index N` | Hämta fr.o.m. AutoID N (ignorerar state) |
-| `--check-connection` | Testa anslutning, inloggning, query-behörighet och berikning. Exit 0 = OK |
-| `--describe TABELL` | Visa kolumner/relaterade tabeller i ePO, t.ex. `EPOComputerProperties` |
-| `--encode-password` | Skapa base64-strängen till `password_b64` |
-| `--debug` | Skriv ut allt skriptet gör (lösenord maskeras) |
-| `--version` | Visa version |
+| `--config FILE` | Config file. Without it, `epo_config.json`, `epo_config.example.json`, `config.example.json` are searched |
+| `--start-index N` | Fetch from AutoID N (ignores the state) |
+| `--check-connection` | Test connection, login, query permission and enrichment. Exit 0 = OK |
+| `--describe TABLE` | Show columns/related tables in ePO, e.g. `EPOComputerProperties` |
+| `--encode-password` | Create the base64 string for `password_b64` |
+| `--debug` | Print everything the script does (passwords are masked) |
+| `--version` | Show the version |
 
-## Lösenord
+## Password
 
-Läses i ordningen: miljövariabeln `EPO_PASSWORD` → `password_b64` i config → fråga i terminalen.
-Base64 är kodning, inte kryptering – skydda config-filen med `chmod 600`.
-`epo_config.json` finns i `.gitignore` och ska aldrig checkas in.
+Read in this order: environment variable `EPO_PASSWORD` → `password_b64` in the config → terminal prompt.
+Base64 is encoding, not encryption – protect the config file with `chmod 600`.
+`epo_config.json` is listed in `.gitignore` and must never be committed.
 
 ## ArcSight
 
-1. Kopiera `trellix_epo.jsonparser.properties` till `<ARCSIGHT_HOME>/current/user/agent/flexagent/`
-2. Installera en **JSON Folder Follower**-connector med Configuration File `trellix_epo`
-3. Peka foldern mot `output_dir`, wildcard `*.json`
+1. Copy `trellix_epo.jsonparser.properties` to `<ARCSIGHT_HOME>/current/user/agent/flexagent/`
+2. Install a **JSON Folder Follower** connector with Configuration File `trellix_epo`
+3. Point the folder at `output_dir`, wildcard `*.json`
 
-Parsern följer ArcSights mappningstabell för ePO (bl.a. dvc/dvchost = ePO-servern,
-cs1–cs5, cn1–cn2, oldFile* = datoregenskaper, severity 0–2 High / 3–4 Medium / 5–7 Low).
-Fält utan naturligt CEF-fält hamnar i Additional Data. Se kommentarerna i parsern.
+The parser follows ArcSight's mapping table for ePO (e.g. dvc/dvchost = the ePO server,
+cs1–cs5, cn1–cn2, oldFile* = system properties, severity 0–2 High / 3–4 Medium / 5–7 Low).
+Fields without a natural CEF field go to Additional Data. See the comments in the parser.
 
-## Licens
+## License
 
-MIT – se [LICENSE](LICENSE).
+MIT – see [LICENSE](LICENSE).
